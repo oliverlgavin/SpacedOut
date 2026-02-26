@@ -33,12 +33,11 @@ Pages and data fetching are server components by default. Client components (`"u
 
 ### Dynamic Import Pattern
 
-Heavy client components (canvas starfield, wireframe Earth, solar system view, terminal) use a wrapper pattern because `ssr: false` is not allowed in server components in Next.js 16:
+Heavy client components (canvas starfield, solar system view) use a wrapper pattern because `ssr: false` is not allowed in server components in Next.js 16:
 
 ```
 src/components/canvas/lazy-starfield.tsx    → wraps starfield-canvas.tsx
 src/components/sections/solar-system/lazy-solar-system.tsx → wraps planet-orbit-view.tsx
-src/components/sections/terminal/lazy-terminal.tsx → wraps terminal-interface.tsx
 ```
 
 Each wrapper is a `"use client"` component that calls `dynamic(() => import(...), { ssr: false })`.
@@ -58,7 +57,9 @@ Color system: dark background `#050510`, electric blue accent `#00d4ff`, glassmo
 
 Cache times are defined in `src/lib/constants/api-endpoints.ts` but applied as literal numbers in each API client's fetch call.
 
-There is also a server-side API route at `src/app/api/metrics/route.ts` (`GET /api/metrics`) that returns crew count, upcoming launches, and active missions. It uses `export const revalidate = 300` for edge caching.
+There are also server-side API routes:
+- `src/app/api/metrics/route.ts` (`GET /api/metrics`) — crew count, upcoming launches, active missions. `revalidate = 300`.
+- `src/app/api/iss/route.ts` (`GET /api/iss`) — ISS position proxy. `revalidate = 30`.
 
 ### Environment Variables
 
@@ -74,4 +75,4 @@ Only `NASA_API_KEY` is required (defaults to `DEMO_KEY`). All other APIs (Launch
 - All API response types live in `src/types/api.ts`
 - Planet data, agency data, and other static constants live in `src/lib/constants/`
 - SVG-based charts (`src/components/charts/`) use Framer Motion for animation — no chart libraries
-- GSAP is available (used in `bounce-cards.tsx`) but Framer Motion is the primary animation library
+- Framer Motion is the only animation library — no GSAP, no chart libs

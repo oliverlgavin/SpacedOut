@@ -18,24 +18,53 @@ const FILTER_AGENCIES = [
   { label: "ULA", value: "124" },
 ];
 
+type View = "upcoming" | "launched";
+
 interface LaunchesContentProps {
   upcoming: Launch[];
   recent: Launch[];
 }
 
 export function LaunchesContent({ upcoming, recent }: LaunchesContentProps) {
+  const [view, setView] = useState<View>("upcoming");
   const [agency, setAgency] = useState("");
 
-  const filteredUpcoming = agency
-    ? upcoming.filter((l) => String(l.launch_service_provider.id) === agency)
-    : upcoming;
-
-  const filteredRecent = agency
-    ? recent.filter((l) => String(l.launch_service_provider.id) === agency)
-    : recent;
+  const launches = view === "upcoming" ? upcoming : recent;
+  const filtered = agency
+    ? launches.filter((l) => String(l.launch_service_provider.id) === agency)
+    : launches;
 
   return (
     <>
+      {/* View toggle */}
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={() => setView("upcoming")}
+          className={cn(
+            "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2",
+            view === "upcoming"
+              ? "bg-blue-electric/15 text-blue-electric border border-blue-electric/30"
+              : "glass text-foreground-muted hover:text-foreground hover:bg-white/5"
+          )}
+        >
+          <span className="w-2 h-2 rounded-full bg-blue-electric animate-pulse-glow" />
+          Upcoming
+        </button>
+        <button
+          onClick={() => setView("launched")}
+          className={cn(
+            "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2",
+            view === "launched"
+              ? "bg-success/15 text-success border border-success/30"
+              : "glass text-foreground-muted hover:text-foreground hover:bg-white/5"
+          )}
+        >
+          <span className="w-2 h-2 rounded-full bg-success" />
+          Launched
+        </button>
+      </div>
+
+      {/* Agency filter */}
       <div className="flex flex-wrap gap-2 mb-6">
         {FILTER_AGENCIES.map((a) => (
           <button
@@ -53,25 +82,7 @@ export function LaunchesContent({ upcoming, recent }: LaunchesContentProps) {
         ))}
       </div>
 
-      {/* Upcoming */}
-      <section className="mb-12">
-        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-blue-electric animate-pulse-glow" />
-          Upcoming Launches
-        </h2>
-        <LaunchGrid key={`upcoming-${agency}`} launches={filteredUpcoming} />
-      </section>
-
-      {/* Recent */}
-      {filteredRecent.length > 0 && (
-        <section>
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-success" />
-            Recent Launches
-          </h2>
-          <LaunchGrid key={`recent-${agency}`} launches={filteredRecent} />
-        </section>
-      )}
+      <LaunchGrid key={`${view}-${agency}`} launches={filtered} />
     </>
   );
 }

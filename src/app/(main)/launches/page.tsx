@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default async function LaunchesPage() {
   const [upcoming, recent] = await Promise.all([
     getUpcomingLaunchesData(20),
-    getRecentLaunchesData(6),
+    getRecentLaunchesData(20),
   ]);
 
   return (

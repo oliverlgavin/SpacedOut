@@ -177,6 +177,5 @@ export interface DashboardData {
   launches: Launch[];
   crew: PeopleInSpaceResponse;
   iss: ISSPosition;
-  recentLaunches: Launch[];
   marsImage: NasaImage | null;
 }
