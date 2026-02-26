@@ -5,7 +5,16 @@ import { GlassPanel } from "@/components/ui/glass-panel";
 import { RadialProgress } from "@/components/charts/radial-progress";
 import { FadeIn } from "@/components/motion/fade-in";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
+import { AGENCIES } from "@/lib/constants/agencies";
 import type { Launch } from "@/types/api";
+
+const AGENCY_DISPLAY_NAMES = new Map(
+  AGENCIES.map((a) => [a.id, a.abbrev])
+);
+
+function getAgencyDisplayName(provider: Launch["launch_service_provider"]) {
+  return AGENCY_DISPLAY_NAMES.get(provider.id) ?? provider.name;
+}
 
 interface MissionStatsProps {
   launches: Launch[];
@@ -16,10 +25,7 @@ export function MissionStats({ launches }: MissionStatsProps) {
 
   // Calculate launches by agency
   const agencyCounts = launches.reduce<Record<string, number>>((acc, l) => {
-    const name = l.launch_service_provider.name;
-    const abbrev = l.launch_service_provider.abbrev;
-    // Use short name for display
-    const label = abbrev.length <= 8 ? abbrev : name.split(" ")[0];
+    const label = getAgencyDisplayName(l.launch_service_provider);
     acc[label] = (acc[label] || 0) + 1;
     return acc;
   }, {});
@@ -53,7 +59,7 @@ export function MissionStats({ launches }: MissionStatsProps) {
           <div className="space-y-3">
             {chartData.map((point, i) => (
               <div key={point.label} className="flex items-center gap-3">
-                <span className="text-xs text-foreground-muted font-mono w-20 text-right shrink-0">
+                <span className="text-xs text-foreground-muted font-mono w-36 text-right shrink-0 truncate">
                   {point.label}
                 </span>
                 <div className="flex-1 h-7 bg-white/5 rounded-md overflow-hidden relative">
