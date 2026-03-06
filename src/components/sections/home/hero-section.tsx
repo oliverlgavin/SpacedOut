@@ -1,36 +1,31 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { MetricCard } from "@/components/ui/metric-card";
+import { LazyGlobe } from "@/components/3d/lazy-globe";
 import type { DashboardData } from "@/types/api";
-
-/* Performance: wireframe Earth is CSS 3D — dynamically imported to isolate bundle */
-const WireframeEarth = dynamic(
-  () =>
-    import("@/components/3d-css/wireframe-earth").then(
-      (m) => m.WireframeEarth
-    ),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="w-[300px] h-[300px] rounded-full border border-blue-electric/10 animate-pulse" />
-    ),
-  }
-);
 
 interface HeroSectionProps {
   data: DashboardData;
 }
 
 const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+const ISS_POLL_INTERVAL = 5_000;
 
 export function HeroSection({ data }: HeroSectionProps) {
   const [metrics, setMetrics] = useState({
     humansInSpace: data.crew.number,
     upcomingLaunches: data.launches.length,
     activeMissions: data.launches.filter((l) => l.mission).length,
+  });
+
+  const [issPosition, setIssPosition] = useState<{
+    latitude: number;
+    longitude: number;
+  }>({
+    latitude: data.iss.latitude,
+    longitude: data.iss.longitude,
   });
 
   useEffect(() => {
@@ -51,6 +46,29 @@ export function HeroSection({ data }: HeroSectionProps) {
     }
 
     const interval = setInterval(refreshMetrics, TWENTY_FOUR_HOURS);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    async function refreshISS() {
+      try {
+        const res = await fetch("/api/iss");
+        if (res.ok) {
+          const pos = await res.json();
+          if (pos.latitude !== undefined) {
+            setIssPosition({
+              latitude: pos.latitude,
+              longitude: pos.longitude,
+            });
+          }
+        }
+      } catch {
+        // Keep last known position
+      }
+    }
+
+    const interval = setInterval(refreshISS, ISS_POLL_INTERVAL);
 
     return () => clearInterval(interval);
   }, []);
@@ -76,14 +94,14 @@ export function HeroSection({ data }: HeroSectionProps) {
         </p>
       </motion.div>
 
-      {/* Wireframe Earth */}
+      {/* 3D Earth Globe with live ISS tracking */}
       <motion.div
         className="relative my-8"
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1, delay: 0.3 }}
       >
-        <WireframeEarth size={280} />
+        <LazyGlobe size={320} issPosition={issPosition} />
       </motion.div>
 
       {/* Live metrics */}

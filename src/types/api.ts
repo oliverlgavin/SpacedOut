@@ -125,44 +125,6 @@ export interface MarsRoverPhoto {
   };
 }
 
-/* ── SpaceX ── */
-
-export interface SpaceXLaunch {
-  id: string;
-  name: string;
-  date_utc: string;
-  date_unix: number;
-  success: boolean | null;
-  details: string | null;
-  rocket: string;
-  crew: string[];
-  links: {
-    patch: { small: string | null; large: string | null };
-    webcast: string | null;
-    wikipedia: string | null;
-  };
-}
-
-/* ── Spaceflight News ── */
-
-export interface NewsArticle {
-  id: number;
-  title: string;
-  url: string;
-  image_url: string;
-  news_site: string;
-  summary: string;
-  published_at: string;
-  launches: { launch_id: string; provider: string }[];
-}
-
-export interface NewsResponse {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: NewsArticle[];
-}
-
 /* ── Dashboard Aggregate ── */
 
 export interface NasaImage {
